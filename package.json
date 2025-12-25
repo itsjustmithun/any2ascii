@@ -1,0 +1,51 @@
+{
+  "name": "asciime",
+  "version": "1.0.0",
+  "description": "Turn images/videos to ASCII using WebGL",
+  "author": "Mithun Ramesh",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/itsjustmithun/asciime"
+  },
+  "keywords": [
+    "ascii",
+    "video",
+    "webgl",
+    "react",
+    "ascii-art"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "assets"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "lint": "eslint src/",
+    "prepublishOnly": "npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "react": "^18",
+    "react-dom": "^18",
+    "tsup": "^8",
+    "typescript": "^5"
+  }
+}
