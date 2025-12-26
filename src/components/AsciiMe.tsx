@@ -1,18 +1,19 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useMemo } from "react";
 import { useAsciiMe } from "@/hooks/useAsciiMe";
 import { useAsciiMouseEffect } from "@/hooks/useAsciiMouseEffect";
 import { useAsciiRipple } from "@/hooks/useAsciiRipple";
 import { useAsciiAudio } from "@/hooks/useAsciiAudio";
 import { type AsciiMeProps } from "@/lib/webgl";
+import { detectMediaType } from "@/lib/media-utils";
 
 export type { AsciiMeProps };
 
 // Component Implementation
 export function AsciiMe({
   src,
-  mediaType = "video",
+  mediaType,
   numColumns,
   colored = true,
   blend = 0,
@@ -32,6 +33,11 @@ export function AsciiMe({
   showStats = false,
   className = "",
 }: AsciiMeProps) {
+  // Auto-detect media type from src if not explicitly provided
+  const resolvedMediaType = useMemo(
+    () => mediaType || detectMediaType(src),
+    [src, mediaType]
+  );
   // Core hook handles WebGL setup and rendering
   const ascii = useAsciiMe({
     numColumns,
@@ -42,7 +48,7 @@ export function AsciiMe({
     dither,
     charset,
     enableSpacebarToggle,
-    mediaType,
+    mediaType: resolvedMediaType,
   });
 
   // Destructure to avoid linter issues with accessing refs
@@ -61,7 +67,7 @@ export function AsciiMe({
   });
 
   useAsciiAudio(ascii, {
-    enabled: audioEffect > 0 && mediaType === "video",
+    enabled: audioEffect > 0 && resolvedMediaType === "video",
     reactivity: audioEffect,
     sensitivity: audioRange,
   });
@@ -69,7 +75,7 @@ export function AsciiMe({
   // Control video playback based on isPlaying prop
   useEffect(() => {
     const video = videoRef.current;
-    if (!video || mediaType !== "video") return;
+    if (!video || resolvedMediaType !== "video") return;
 
     if (isPlaying) {
       if (autoPlay && isReady) {
@@ -80,12 +86,12 @@ export function AsciiMe({
     } else {
       video.pause();
     }
-  }, [isPlaying, autoPlay, isReady, videoRef, mediaType]);
+  }, [isPlaying, autoPlay, isReady, videoRef, resolvedMediaType])
 
   return (
     <div className={`video-to-ascii ${className}`}>
       {/* Hidden video element - feeds frames to WebGL */}
-      {mediaType === "video" && (
+      {resolvedMediaType === "video" && (
         <video
           ref={videoRef}
           src={src}
@@ -98,7 +104,7 @@ export function AsciiMe({
       )}
 
       {/* Hidden image element - feeds frames to WebGL */}
-      {mediaType === "image" && (
+      {resolvedMediaType === "image" && (
         <img
           ref={imageRef}
           src={src}

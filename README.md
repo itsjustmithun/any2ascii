@@ -48,6 +48,9 @@ function App() {
 // Minimal video setup
 <AsciiMe src="/video.mp4" />
 
+// Animated GIF (auto-detected)
+<AsciiMe src="/animation.gif" />
+
 // Image to ASCII
 <AsciiMe 
   src="/image.jpg" 
@@ -67,7 +70,7 @@ function App() {
 
 ## Image Support
 
-AsciiMe now supports static images in addition to videos:
+AsciiMe supports static images and animated GIFs in addition to videos:
 
 ```tsx
 // Basic image
@@ -76,6 +79,14 @@ AsciiMe now supports static images in addition to videos:
   mediaType="image"
   numColumns={120}
   colored={true}
+/>
+
+// Animated GIF (auto-detected, no mediaType needed)
+<AsciiMe 
+  src="/animation.gif"
+  numColumns={120}
+  colored={true}
+  audioEffect={0}
 />
 
 // Image with interactive effects
@@ -87,11 +98,12 @@ AsciiMe now supports static images in addition to videos:
 />
 ```
 
-**Important notes for images:**
-- Set `mediaType="image"` prop to enable image mode
-- Images must be served with CORS headers for cross-origin access
-- Audio effects are automatically disabled for images
-- Interactive effects (mouse, ripple) continue to work with static images
+**Important notes:**
+- Images and GIFs: Set `mediaType="image"` to enable image mode (optional for static images if auto-detection works)
+- GIFs: Automatically detected and treated as video elements (no `mediaType` needed)
+- All formats must be served with CORS headers for cross-origin access
+- Audio effects are automatically disabled for images and GIFs
+- Interactive effects (mouse, ripple) work with all formats
 - The render loop runs continuously for interactive effects, or renders once for static display
 
 ## API Reference

@@ -7,12 +7,15 @@ on:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: '25'
           registry-url: 'https://registry.npmjs.org'
@@ -24,13 +27,19 @@ jobs:
         run: npm run build
 
       - name: Publish to npm
-        run: npm publish
+        run: npm publish --provenance --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Deployment
         uses: actions/github-script@v6
+        env:
+          PACKAGE_NAME: asciime
+          PACKAGE_VERSION: ${{ github.event.release.tag_name }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const { PACKAGE_NAME, PACKAGE_VERSION } = process.env;
             const { data: deployment } = await github.rest.repos.createDeployment({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -45,5 +54,5 @@ jobs:
               repo: context.repo.repo,
               deployment_id: deployment.id,
               state: 'success',
-              environment_url: `https://www.npmjs.com/package/${process.env.npm_package_name}/v/${process.env.npm_package_version}`,
+              environment_url: `https://www.npmjs.com/package/${PACKAGE_NAME}/v/${PACKAGE_VERSION.replace('v', '')}`,
             });
