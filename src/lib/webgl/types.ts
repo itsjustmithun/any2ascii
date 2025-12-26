@@ -34,6 +34,7 @@ export interface UniformLocations {
   u_blend: WebGLUniformLocation | null;
   u_highlight: WebGLUniformLocation | null;
   u_brightness: WebGLUniformLocation | null;
+  u_ditherMode: WebGLUniformLocation | null;
 
   // Mouse
   u_mouse: WebGLUniformLocation | null;
@@ -60,6 +61,7 @@ export interface UseAsciiMeOptions {
   blend?: number;
   highlight?: number;
   brightness?: number;
+  dither?: "none" | "bayer" | "random";
   charset?: CharsetKey;
   maxWidth?: number;
   numColumns?: number;
@@ -124,6 +126,7 @@ export interface AsciiMeProps {
   blend?: number;
   highlight?: number;
   brightness?: number;
+  dither?: "none" | "bayer" | "random";
   charset?: CharsetKey;
 
   // Mouse effect

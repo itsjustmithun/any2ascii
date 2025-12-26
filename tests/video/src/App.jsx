@@ -9,6 +9,7 @@ export default function App() {
         numColumns={150}
         colored={true}
         autoPlay={true}
+        enableMouse={true}
       />
     </div>
   )

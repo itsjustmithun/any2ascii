@@ -33,6 +33,7 @@ export function useAsciiMe(
     blend = 0,
     highlight = 0,
     brightness = 1.0,
+    dither = "none",
     charset = DEFAULT_CHARSET,
     maxWidth,
     enableSpacebarToggle = false,
@@ -115,6 +116,7 @@ export function useAsciiMe(
         u_blend: get("u_blend"),
         u_highlight: get("u_highlight"),
         u_brightness: get("u_brightness"),
+        u_ditherMode: get("u_ditherMode"),
 
         // Mouse uniforms
         u_mouse: get("u_mouse"),
@@ -219,6 +221,10 @@ export function useAsciiMe(
     gl.uniform2f(locations.u_gridSize, finalCols, grid.rows);
     gl.uniform1f(locations.u_numChars, chars.length);
     gl.uniform1f(locations.u_brightness, brightness);
+    
+    // Set dither mode: 0=none, 1=bayer, 2=random
+    const ditherModeValue = dither === "bayer" ? 1 : dither === "random" ? 2 : 0;
+    gl.uniform1f(locations.u_ditherMode, ditherModeValue);
 
     // Initialize feature uniforms to disabled state
     gl.uniform2f(locations.u_mouse, -1, -1);

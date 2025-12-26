@@ -17,6 +17,7 @@ export function AsciiMe({
   blend = 0,
   highlight = 0,
   brightness = 1.0,
+  dither = "none",
   charset = "standard",
   enableMouse = true,
   trailLength = 24,
@@ -37,6 +38,7 @@ export function AsciiMe({
     blend,
     highlight,
     brightness,
+    dither,
     charset,
     enableSpacebarToggle,
   });

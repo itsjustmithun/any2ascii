@@ -16,6 +16,7 @@ uniform bool u_colored;
 uniform float u_blend;
 uniform float u_highlight;
 uniform float u_brightness;
+uniform float u_ditherMode; // 0=none, 1=bayer, 2=random
 
 // Audio
 uniform float u_audioLevel;
@@ -56,17 +57,24 @@ void main() {
   float audioModulated = baseBrightness * audioMultiplier;
   float brightness = mix(baseBrightness, audioModulated, u_audioReactivity);
   
-  // Cursor glow - blocky circle effect
+  // Cursor glow - soft fade from center to edges
   float cursorGlow = 0.0;
   float cursorRadius = 5.0;
   
-  vec2 mouseCell = floor(u_mouse * u_gridSize);
-  float cellDist = length(thisCell - mouseCell);
-  if (cellDist <= cursorRadius && u_mouse.x >= 0.0) {
-    cursorGlow += 1.0 - cellDist / cursorRadius;
+  if (u_mouse.x >= 0.0) {
+    vec2 mouseCell = floor(u_mouse * u_gridSize);
+    float cellDist = length(thisCell - mouseCell);
+    
+    // Very smooth falloff - high opacity in middle, gentle fade to edges
+    float normalizedDist = cellDist / cursorRadius;
+    if (normalizedDist < 1.0) {
+      // Use smoothstep for natural fade without hard edges
+      float falloff = smoothstep(1.0, 0.0, normalizedDist);
+      cursorGlow += falloff;
+    }
   }
   
-  // Trail effect
+  // Trail effect with soft fading
   for (int i = 0; i < 12; i++) {
     if (i >= u_trailLength) break;
     vec2 trailPos = u_trail[i];
@@ -76,9 +84,11 @@ void main() {
     float trailDist = length(thisCell - trailCell);
     float trailRadius = cursorRadius * 0.8;
     
-    if (trailDist <= trailRadius) {
+    float normalizedDist = trailDist / trailRadius;
+    if (normalizedDist < 1.0) {
       float fade = 1.0 - float(i) / float(u_trailLength);
-      cursorGlow += (1.0 - trailDist / trailRadius) * 0.5 * fade;
+      float falloff = smoothstep(1.0, 0.0, normalizedDist);
+      cursorGlow += falloff * 0.5 * fade;
     }
   }
   cursorGlow = min(cursorGlow, 1.0);
@@ -126,8 +136,38 @@ void main() {
   }
   adjustedBrightness = clamp(adjustedBrightness, 0.0, 1.0);
   
+  // Apply dithering to create smoother gradients
+  float ditheredBrightness = adjustedBrightness;
+  
+  if (u_ditherMode > 0.5 && u_ditherMode < 1.5) {
+    // Bayer matrix dithering (ordered dithering)
+    // 4x4 Bayer matrix normalized to [0,1]
+    mat4 bayer = mat4(
+      0.0/16.0,  8.0/16.0,  2.0/16.0, 10.0/16.0,
+      12.0/16.0, 4.0/16.0, 14.0/16.0,  6.0/16.0,
+      3.0/16.0, 11.0/16.0,  1.0/16.0,  9.0/16.0,
+      15.0/16.0, 7.0/16.0, 13.0/16.0,  5.0/16.0
+    );
+    
+    // Get position in 4x4 pattern
+    ivec2 bayerPos = ivec2(mod(gl_FragCoord.xy, 4.0));
+    float threshold = bayer[bayerPos.x][bayerPos.y];
+    
+    // Add dither threshold scaled by character spacing
+    float ditherAmount = (1.0 / u_numChars) * 0.75;
+    ditheredBrightness += (threshold - 0.5) * ditherAmount;
+  } else if (u_ditherMode > 1.5) {
+    // Random dithering (blue noise-like)
+    // Simple pseudo-random based on pixel position
+    float noise = fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453);
+    float ditherAmount = (1.0 / u_numChars) * 0.5;
+    ditheredBrightness += (noise - 0.5) * ditherAmount;
+  }
+  
+  ditheredBrightness = clamp(ditheredBrightness, 0.0, 1.0);
+  
   // Map brightness to character index (0 = darkest char, numChars-1 = brightest)
-  float charIndex = floor(adjustedBrightness * (u_numChars - 0.001));
+  float charIndex = floor(ditheredBrightness * (u_numChars - 0.001));
   
   // Find the character in the atlas (horizontal strip of pre-rendered chars)
   float atlasX = charIndex / u_numChars;
