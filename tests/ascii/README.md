@@ -1,4 +1,4 @@
-# AsciiMe Test Environment
+# Any2Ascii Test Environment
 
 Test setup for both video and image ASCII conversion.
 

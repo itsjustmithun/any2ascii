@@ -1,6 +1,6 @@
-# asciime
+# any2ascii
 
-WebGL-powered React Component for real-time video or image to ASCII conversion.
+WebGL-powered React Component for real-time video, image, gif to ASCII
 
 ## Demo
 
@@ -11,22 +11,22 @@ WebGL-powered React Component for real-time video or image to ASCII conversion.
 ## Installation
 
 ```bash
-npm install asciime
+npm install any2ascii
 ```
 
 Or with yarn:
 ```bash
-yarn add asciime
+yarn add any2ascii
 ```
 
 ## Quick Start
 
 ```tsx
-import AsciiMe from "asciime";
+import Any2Ascii from "any2ascii";
 
 function App() {
   return (
-    <AsciiMe
+    <Any2Ascii
       src="/video.mp4"
       numColumns={120}
       colored={true}
@@ -46,13 +46,13 @@ function App() {
 
 ```tsx
 // Minimal video setup
-<AsciiMe src="/video.mp4" />
+<Any2Ascii src="/video.mp4" />
 
 // Animated GIF (auto-detected)
-<AsciiMe src="/animation.gif" />
+<Any2Ascii src="/animation.gif" />
 
 // Image to ASCII
-<AsciiMe 
+<Any2Ascii 
   src="/image.jpg" 
   mediaType="image"
   numColumns={120}
@@ -60,7 +60,7 @@ function App() {
 />
 
 // With custom styling
-<AsciiMe 
+<Any2Ascii 
   src="/video.mp4" 
   numColumns={80}
   colored={false}
@@ -70,11 +70,11 @@ function App() {
 
 ## Image Support
 
-AsciiMe supports static images and animated GIFs in addition to videos:
+Any2Ascii supports static images and animated GIFs in addition to videos:
 
 ```tsx
 // Basic image
-<AsciiMe 
+<Any2Ascii 
   src="https://example.com/image.jpg"
   mediaType="image"
   numColumns={120}
@@ -82,7 +82,7 @@ AsciiMe supports static images and animated GIFs in addition to videos:
 />
 
 // Animated GIF (auto-detected, no mediaType needed)
-<AsciiMe 
+<Any2Ascii 
   src="/animation.gif"
   numColumns={120}
   colored={true}
@@ -90,7 +90,7 @@ AsciiMe supports static images and animated GIFs in addition to videos:
 />
 
 // Image with interactive effects
-<AsciiMe 
+<Any2Ascii 
   src="/photo.png"
   mediaType="image"
   enableMouse={true}
@@ -138,10 +138,10 @@ AsciiMe supports static images and animated GIFs in addition to videos:
 Available character sets for different visual styles:
 
 ```tsx
-import { ASCII_CHARSETS } from "asciime";
+import { ASCII_CHARSETS } from "any2ascii";
 
 // Use in your component
-<AsciiMe src="/video.mp4" charset="detailed" />
+<Any2Ascii src="/video.mp4" charset="detailed" />
 ```
 
 | Charset     | Characters               | Description                      |
@@ -182,7 +182,7 @@ Dithering is especially effective with minimal character sets or when you want f
 ### Classic Terminal Look
 
 ```tsx
-<AsciiMe 
+<Any2Ascii 
   src="/video.mp4"
   colored={false}
   charset="standard"
@@ -193,7 +193,7 @@ Dithering is especially effective with minimal character sets or when you want f
 ### Audio Reactive
 
 ```tsx
-<AsciiMe 
+<Any2Ascii 
   src="/video.mp4"
   audioEffect={80}
   audioRange={70}
@@ -204,7 +204,7 @@ Dithering is especially effective with minimal character sets or when you want f
 ### Matrix Style
 
 ```tsx
-<AsciiMe 
+<Any2Ascii 
   src="/video.mp4"
   charset="binary"
   colored={false}
@@ -215,7 +215,7 @@ Dithering is especially effective with minimal character sets or when you want f
 ### Smooth Dithering
 
 ```tsx
-<AsciiMe 
+<Any2Ascii 
   src="/video.mp4"
   dither="bayer"
   charset="minimal"
@@ -226,7 +226,7 @@ Dithering is especially effective with minimal character sets or when you want f
 ### Interactive Experience
 
 ```tsx
-<AsciiMe 
+<Any2Ascii 
   src="/video.mp4"
   enableMouse={true}
   enableRipple={true}

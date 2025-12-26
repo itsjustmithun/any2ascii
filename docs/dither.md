@@ -2,7 +2,7 @@
 
 ## Overview
 
-Dithering has been added to the asciime module to create smoother gradients and reduce banding in ASCII art. This is particularly useful when using character sets with fewer characters.
+Dithering has been added to the any2ascii module to create smoother gradients and reduce banding in ASCII art. This is particularly useful when using character sets with fewer characters.
 
 ## What is Dithering?
 
@@ -19,22 +19,22 @@ Dithering is a technique that creates the illusion of smoother gradients by addi
 ### Code Location
 - Shader: `src/lib/webgl/shaders/fragment.glsl`
 - Types: `src/lib/webgl/types.ts`
-- Hook: `src/hooks/useAsciiMe.ts`
-- Component: `src/components/AsciiMe.tsx`
+- Hook: `src/hooks/useAny2Ascii.ts`
+- Component: `src/components/Any2Ascii.tsx`
 
 ## Usage
 
 ```tsx
-import AsciiMe from "asciime";
+import Any2Ascii from "any2ascii";
 
 // No dithering (default)
-<AsciiMe src="/video.mp4" dither="none" />
+<Any2Ascii src="/video.mp4" dither="none" />
 
 // Bayer matrix dithering (ordered patterns)
-<AsciiMe src="/video.mp4" dither="bayer" />
+<Any2Ascii src="/video.mp4" dither="bayer" />
 
 // Random dithering (organic grain)
-<AsciiMe src="/video.mp4" dither="random" />
+<Any2Ascii src="/video.mp4" dither="random" />
 ```
 
 ## When to Use Dithering
@@ -99,7 +99,7 @@ Dithering adds minimal overhead:
 
 ```tsx
 // Film grain effect with minimal characters
-<AsciiMe 
+<Any2Ascii 
   src="/video.mp4"
   charset="minimal"
   dither="random"
@@ -107,7 +107,7 @@ Dithering adds minimal overhead:
 />
 
 // Smooth gradients with standard charset
-<AsciiMe 
+<Any2Ascii 
   src="/video.mp4"
   charset="standard"
   dither="bayer"
@@ -115,7 +115,7 @@ Dithering adds minimal overhead:
 />
 
 // High detail without dithering
-<AsciiMe 
+<Any2Ascii 
   src="/video.mp4"
   charset="detailed"
   dither="none"

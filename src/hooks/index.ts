@@ -1,5 +1,5 @@
 // Core hook
-export { useAsciiMe } from "./useAsciiMe";
+export { useAny2Ascii } from "./useAny2Ascii";
 
 // Feature hooks
 export { useAsciiMouseEffect } from "./useAsciiMouseEffect";
@@ -8,7 +8,7 @@ export { useAsciiAudio } from "./useAsciiAudio";
 
 // Types
 export type {
-  UseAsciiMeOptions,
+  UseAny2AsciiOptions,
   AsciiContext,
   AsciiStats,
   UseAsciiMouseEffectOptions,

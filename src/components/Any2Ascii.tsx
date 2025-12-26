@@ -1,17 +1,17 @@
 "use client";
 
 import { useEffect, useMemo } from "react";
-import { useAsciiMe } from "@/hooks/useAsciiMe";
+import { useAny2Ascii } from "@/hooks/useAny2Ascii";
 import { useAsciiMouseEffect } from "@/hooks/useAsciiMouseEffect";
 import { useAsciiRipple } from "@/hooks/useAsciiRipple";
 import { useAsciiAudio } from "@/hooks/useAsciiAudio";
-import { type AsciiMeProps } from "@/lib/webgl";
+import { type Any2AsciiProps } from "@/lib/webgl";
 import { detectMediaType } from "@/lib/media-utils";
 
-export type { AsciiMeProps };
+export type { Any2AsciiProps };
 
 // Component Implementation
-export function AsciiMe({
+export function Any2Ascii({
   src,
   mediaType,
   numColumns,
@@ -32,14 +32,14 @@ export function AsciiMe({
   enableSpacebarToggle = false,
   showStats = false,
   className = "",
-}: AsciiMeProps) {
+}: Any2AsciiProps) {
   // Auto-detect media type from src if not explicitly provided
   const resolvedMediaType = useMemo(
     () => mediaType || detectMediaType(src),
     [src, mediaType]
   );
   // Core hook handles WebGL setup and rendering
-  const ascii = useAsciiMe({
+  const ascii = useAny2Ascii({
     numColumns,
     colored,
     blend,
@@ -143,4 +143,4 @@ export function AsciiMe({
   );
 }
 
-export default AsciiMe;
+export default Any2Ascii;
