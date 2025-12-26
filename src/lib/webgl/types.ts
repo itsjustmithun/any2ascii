@@ -55,7 +55,7 @@ export interface UniformLocations {
 }
 
 // Hook Options
-export interface UseAsciiMeOptions {
+export interface UseAny2AsciiOptions {
   fontSize?: number;
   colored?: boolean;
   blend?: number;
@@ -86,7 +86,7 @@ export interface UseAsciiAudioOptions {
   sensitivity?: number;
 }
 
-// Context returned by useAsciiMe
+// Context returned by useAny2Ascii
 export interface AsciiContext {
   containerRef: React.RefObject<HTMLDivElement | null>;
   videoRef: React.RefObject<HTMLVideoElement | null>;
@@ -118,7 +118,7 @@ export interface RippleHandlers {
 }
 
 // Component Props - extends core options with feature-specific props
-export interface AsciiMeProps {
+export interface Any2AsciiProps {
   src: string;
   mediaType?: "video" | "image";
 
@@ -155,7 +155,7 @@ export interface AsciiMeProps {
 }
 
 // Legacy types for backwards compat
-export interface AsciiMeWebGLProps extends AsciiMeProps {
+export interface Any2AsciiWebGLProps extends Any2AsciiProps {
   showBenchmark?: boolean;
   muted?: boolean;
 }

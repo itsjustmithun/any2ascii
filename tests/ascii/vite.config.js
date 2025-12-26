@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
-      'asciime': path.resolve(__dirname, '../../dist/index.mjs')
+      'any2ascii': path.resolve(__dirname, '../../dist/index.mjs')
     }
   }
 })

@@ -10,21 +10,21 @@ import {
   createAsciiAtlas,
   calculateGridDimensions,
   CHAR_WIDTH_RATIO,
-  type UseAsciiMeOptions,
+  type UseAny2AsciiOptions,
   type AsciiContext,
   type AsciiStats,
   type UniformSetter,
   type UniformLocations,
 } from "@/lib/webgl";
 
-export type { UseAsciiMeOptions, AsciiContext, AsciiStats };
+export type { UseAny2AsciiOptions, AsciiContext, AsciiStats };
 
 const MAX_TRAIL_LENGTH = 24;
 const MAX_RIPPLES = 8;
 
 // Hook Implementation
-export function useAsciiMe(
-  options: UseAsciiMeOptions = {}
+export function useAny2Ascii(
+  options: UseAny2AsciiOptions = {}
 ): AsciiContext {
   const {
     fontSize,

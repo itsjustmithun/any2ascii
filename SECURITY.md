@@ -2,7 +2,7 @@
 
 ## Supported Versions
 
-We are committed to ensuring the security of AsciiMe. Security patches are provided for the following versions:
+We are committed to ensuring the security of Any2Ascii. Security patches are provided for the following versions:
 
 | Version | Supported          |
 | ------- | ------------------ |
@@ -10,9 +10,9 @@ We are committed to ensuring the security of AsciiMe. Security patches are provi
 
 ## Reporting a Vulnerability
 
-We take all security bugs in AsciiMe seriously. Thank you for improving the security of our project. We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
+We take all security bugs in Any2Ascii seriously. Thank you for improving the security of our project. We appreciate your efforts and responsible disclosure and will make every effort to acknowledge your contributions.
 
-To report a security vulnerability, please use the [GitHub Security Advisory "Report a Vulnerability" feature](https://github.com/itsjustmithun/asciime/security/advisories/new).
+To report a security vulnerability, please use the [GitHub Security Advisory "Report a Vulnerability" feature](https://github.com/itsjustmithun/any2ascii/security/advisories/new).
 
 **Please do not report security vulnerabilities through public GitHub issues.**
 

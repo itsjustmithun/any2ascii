@@ -1,12 +1,12 @@
 {
-  "name": "asciime",
-  "version": "1.0.0",
+  "name": "any2ascii",
+  "version": "1.0.2",
   "description": "Turn images/videos to ASCII using WebGL",
   "author": "Mithun Ramesh",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/itsjustmithun/asciime"
+    "url": "git+https://github.com/itsjustmithun/any2ascii.git"
   },
   "keywords": [
     "ascii",
