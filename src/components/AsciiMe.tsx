@@ -12,6 +12,7 @@ export type { AsciiMeProps };
 // Component Implementation
 export function AsciiMe({
   src,
+  mediaType = "video",
   numColumns,
   colored = true,
   blend = 0,
@@ -41,10 +42,11 @@ export function AsciiMe({
     dither,
     charset,
     enableSpacebarToggle,
+    mediaType,
   });
 
   // Destructure to avoid linter issues with accessing refs
-  const { containerRef, videoRef, canvasRef, stats, dimensions, isReady } =
+  const { containerRef, videoRef, imageRef, canvasRef, stats, dimensions, isReady } =
     ascii;
 
   // Feature hooks - always call them (React rules), enable/disable via options
@@ -59,7 +61,7 @@ export function AsciiMe({
   });
 
   useAsciiAudio(ascii, {
-    enabled: audioEffect > 0,
+    enabled: audioEffect > 0 && mediaType === "video",
     reactivity: audioEffect,
     sensitivity: audioRange,
   });
@@ -67,7 +69,7 @@ export function AsciiMe({
   // Control video playback based on isPlaying prop
   useEffect(() => {
     const video = videoRef.current;
-    if (!video) return;
+    if (!video || mediaType !== "video") return;
 
     if (isPlaying) {
       if (autoPlay && isReady) {
@@ -78,20 +80,33 @@ export function AsciiMe({
     } else {
       video.pause();
     }
-  }, [isPlaying, autoPlay, isReady, videoRef]);
+  }, [isPlaying, autoPlay, isReady, videoRef, mediaType]);
 
   return (
     <div className={`video-to-ascii ${className}`}>
       {/* Hidden video element - feeds frames to WebGL */}
-      <video
-        ref={videoRef}
-        src={src}
-        muted={audioEffect === 0}
-        loop
-        playsInline
-        crossOrigin="anonymous"
-        style={{ display: "none" }}
-      />
+      {mediaType === "video" && (
+        <video
+          ref={videoRef}
+          src={src}
+          muted={audioEffect === 0}
+          loop
+          playsInline
+          crossOrigin="anonymous"
+          style={{ display: "none" }}
+        />
+      )}
+
+      {/* Hidden image element - feeds frames to WebGL */}
+      {mediaType === "image" && (
+        <img
+          ref={imageRef}
+          src={src}
+          crossOrigin="anonymous"
+          style={{ display: "none" }}
+          alt="Source for ASCII conversion"
+        />
+      )}
 
       {/* Interactive container */}
       <div

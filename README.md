@@ -45,8 +45,16 @@ function App() {
 ### Basic Usage
 
 ```tsx
-// Minimal setup
+// Minimal video setup
 <AsciiMe src="/video.mp4" />
+
+// Image to ASCII
+<AsciiMe 
+  src="/image.jpg" 
+  mediaType="image"
+  numColumns={120}
+  colored={true}
+/>
 
 // With custom styling
 <AsciiMe 
@@ -57,13 +65,43 @@ function App() {
 />
 ```
 
+## Image Support
+
+AsciiMe now supports static images in addition to videos:
+
+```tsx
+// Basic image
+<AsciiMe 
+  src="https://example.com/image.jpg"
+  mediaType="image"
+  numColumns={120}
+  colored={true}
+/>
+
+// Image with interactive effects
+<AsciiMe 
+  src="/photo.png"
+  mediaType="image"
+  enableMouse={true}
+  enableRipple={true}
+/>
+```
+
+**Important notes for images:**
+- Set `mediaType="image"` prop to enable image mode
+- Images must be served with CORS headers for cross-origin access
+- Audio effects are automatically disabled for images
+- Interactive effects (mouse, ripple) continue to work with static images
+- The render loop runs continuously for interactive effects, or renders once for static display
+
 ## API Reference
 
 ### Props
 
 | Prop                   | Type         | Default      | Description                                       |
 | ---------------------- | ------------ | ------------ | ------------------------------------------------- |
-| `src`                  | `string`     | **required** | Video URL or path                                 |
+| `src`                  | `string`     | **required** | Video or image URL/path                           |
+| `mediaType`            | `string`     | `"video"`    | Media type: `"video"` or `"image"`                |
 | `numColumns`           | `number`     | `auto`       | Number of ASCII columns (controls detail level)   |
 | `colored`              | `boolean`    | `true`       | Use original video colors vs green terminal style |
 | `brightness`           | `number`     | `1.0`        | Brightness multiplier (0-2, 1.0 = normal)         |
@@ -75,7 +113,7 @@ function App() {
 | `trailLength`          | `number`     | `24`         | Mouse trail persistence (frames)                  |
 | `enableRipple`         | `boolean`    | `false`      | Enable click ripple effect                        |
 | `rippleSpeed`          | `number`     | `40`         | Ripple expansion speed                            |
-| `audioEffect`          | `number`     | `0`          | Audio-reactive brightness (0-100)                 |
+| `audioEffect`          | `number`     | `0`          | Audio-reactive brightness (0-100, video only)     |
 | `audioRange`           | `number`     | `50`         | Audio effect intensity range (0-100)              |
 | `isPlaying`            | `boolean`    | `true`       | Control video playback state                      |
 | `autoPlay`             | `boolean`    | `true`       | Auto-play video on mount                          |

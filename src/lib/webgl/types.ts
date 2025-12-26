@@ -67,6 +67,7 @@ export interface UseAsciiMeOptions {
   numColumns?: number;
   enableSpacebarToggle?: boolean;
   onStats?: (stats: AsciiStats) => void;
+  mediaType?: "video" | "image";
 }
 
 export interface UseAsciiMouseEffectOptions {
@@ -89,6 +90,7 @@ export interface UseAsciiAudioOptions {
 export interface AsciiContext {
   containerRef: React.RefObject<HTMLDivElement | null>;
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  imageRef: React.RefObject<HTMLImageElement | null>;
   canvasRef: React.RefObject<HTMLCanvasElement | null>;
   glRef: React.RefObject<WebGL2RenderingContext | null>;
   programRef: React.RefObject<WebGLProgram | null>;
@@ -98,6 +100,7 @@ export interface AsciiContext {
   dimensions: GridDimensions;
   stats: AsciiStats;
   isReady: boolean;
+  mediaType: "video" | "image";
   isPlaying: boolean;
   play: () => void;
   pause: () => void;
@@ -117,6 +120,7 @@ export interface RippleHandlers {
 // Component Props - extends core options with feature-specific props
 export interface AsciiMeProps {
   src: string;
+  mediaType?: "video" | "image";
 
   // Size control
   numColumns?: number;

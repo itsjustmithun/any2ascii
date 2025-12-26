@@ -38,11 +38,13 @@ export function useAsciiMe(
     maxWidth,
     enableSpacebarToggle = false,
     onStats,
+    mediaType = "video",
   } = options;
 
   // DOM refs
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const imageRef = useRef<HTMLImageElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   // WebGL refs - these hold the GPU resources
@@ -147,8 +149,18 @@ export function useAsciiMe(
   const initWebGL = useCallback(() => {
     const canvas = canvasRef.current;
     const video = videoRef.current;
+    const image = imageRef.current;
     const container = containerRef.current;
-    if (!canvas || !video || !video.videoWidth || !container) return false;
+    
+    // Get the appropriate media element based on type
+    const mediaElement = mediaType === "video" ? video : image;
+    
+    if (!canvas || !mediaElement || !container) return false;
+    
+    // For video, check if metadata is loaded
+    if (mediaType === "video" && video && !video.videoWidth) return false;
+    // For image, check if it's loaded
+    if (mediaType === "image" && image && (!image.naturalWidth || !image.complete)) return false;
 
     // Recalculate cols and font size based on the *current* container width
     const currentWidth = container.clientWidth;
@@ -159,10 +171,13 @@ export function useAsciiMe(
       ? currentWidth / (numColumns * CHAR_WIDTH_RATIO)
       : calculatedFontSize;
 
-    // Figure out grid dimensions from video aspect ratio
+    // Figure out grid dimensions from media aspect ratio
+    const mediaWidth = mediaType === "video" && video ? video.videoWidth : image?.naturalWidth || 0;
+    const mediaHeight = mediaType === "video" && video ? video.videoHeight : image?.naturalHeight || 0;
+    
     const grid = calculateGridDimensions(
-      video.videoWidth,
-      video.videoHeight,
+      mediaWidth,
+      mediaHeight,
       finalCols
     );
     setDimensions(grid);
@@ -238,6 +253,12 @@ export function useAsciiMe(
     gl.viewport(0, 0, pixelWidth, pixelHeight);
 
     setIsReady(true);
+    
+    // For images, render immediately since they don't have a play/pause cycle
+    if (mediaType === "image") {
+      renderFrame();
+    }
+    
     return true;
   }, [
     numColumns,
@@ -245,24 +266,33 @@ export function useAsciiMe(
     chars,
     cacheUniformLocations,
     brightness,
+    dither,
+    mediaType,
   ]);
 
   // Render loop - runs every frame while video is playing
   const render = useCallback(() => {
     const gl = glRef.current;
     const video = videoRef.current;
+    const image = imageRef.current;
     const program = programRef.current;
     const locations = uniformLocationsRef.current;
 
-    if (!gl || !video || !program || !locations || video.paused || video.ended)
-      return;
+    if (!gl || !program || !locations) return;
+    
+    // Get the appropriate media element
+    const mediaElement = mediaType === "video" ? video : image;
+    if (!mediaElement) return;
+    
+    // For video, check if it's paused or ended
+    if (mediaType === "video" && video && (video.paused || video.ended)) return;
 
     const frameStart = performance.now();
 
-    // Upload current video frame to GPU
+    // Upload current frame to GPU (works for both video and image)
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, videoTextureRef.current);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, video);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mediaElement);
     // Generate mipmaps for better quality when sampling large areas
     gl.generateMipmap(gl.TEXTURE_2D);
 
@@ -303,12 +333,48 @@ export function useAsciiMe(
       lastFpsTimeRef.current = now;
     }
 
-    // Schedule next frame
+    // Schedule next frame (for video or if interactive effects are enabled)
     animationRef.current = requestAnimationFrame(render);
-  }, [colored, blend, highlight, brightness, onStats]);
+  }, [colored, blend, highlight, brightness, onStats, mediaType]);
+
+  // Single frame render function for images
+  const renderFrame = useCallback(() => {
+    const gl = glRef.current;
+    const image = imageRef.current;
+    const program = programRef.current;
+    const locations = uniformLocationsRef.current;
+
+    if (!gl || !image || !program || !locations) return;
+
+    // Upload image to GPU
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, videoTextureRef.current);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    gl.generateMipmap(gl.TEXTURE_2D);
+
+    // Bind the ASCII atlas texture
+    gl.activeTexture(gl.TEXTURE1);
+    gl.bindTexture(gl.TEXTURE_2D, atlasTextureRef.current);
+
+    // Update uniforms
+    gl.uniform1i(locations.u_colored, colored ? 1 : 0);
+    gl.uniform1f(locations.u_blend, blend / 100);
+    gl.uniform1f(locations.u_highlight, highlight / 100);
+    gl.uniform1f(locations.u_brightness, brightness);
+
+    // Let feature hooks update their uniforms
+    for (const setter of uniformSettersRef.current.values()) {
+      setter(gl, program, locations);
+    }
+
+    // Draw the quad
+    gl.drawArrays(gl.TRIANGLES, 0, 6);
+  }, [colored, blend, highlight, brightness]);
 
   // Video Event Handlers
   useEffect(() => {
+    if (mediaType !== "video") return;
+    
     const video = videoRef.current;
     if (!video) return;
 
@@ -350,12 +416,46 @@ export function useAsciiMe(
     };
   }, [initWebGL, render]);
 
+  // Image Event Handlers
+  useEffect(() => {
+    if (mediaType !== "image") return;
+    
+    const image = imageRef.current;
+    if (!image) return;
+
+    const handleImageLoad = () => {
+      initWebGL();
+      // For images with interactive effects (mouse, ripple), start the render loop
+      if (uniformSettersRef.current.size > 0) {
+        animationRef.current = requestAnimationFrame(render);
+      }
+    };
+
+    image.addEventListener("load", handleImageLoad);
+
+    // If image is already loaded when we mount
+    if (image.complete && image.naturalWidth) {
+      handleImageLoad();
+    }
+
+    return () => {
+      image.removeEventListener("load", handleImageLoad);
+      cancelAnimationFrame(animationRef.current);
+    };
+  }, [initWebGL, render, mediaType]);
+
   // Reinitialize when config changes (numColumns, brightness, etc.)
   useEffect(() => {
-    if (videoRef.current && videoRef.current.readyState >= 1) {
-      initWebGL();
+    if (mediaType === "video") {
+      if (videoRef.current && videoRef.current.readyState >= 1) {
+        initWebGL();
+      }
+    } else if (mediaType === "image") {
+      if (imageRef.current && imageRef.current.complete) {
+        initWebGL();
+      }
     }
-  }, [initWebGL]);
+  }, [initWebGL, mediaType]);
 
   const resizeObserverRef = useRef<ResizeObserver | null>(null);
 
@@ -371,7 +471,9 @@ export function useAsciiMe(
 
     const resizeObserver = new ResizeObserver(() => {
       // Reinitialize WebGL when container size changes
-      if (videoRef.current && videoRef.current.readyState >= 1) {
+      if (mediaType === "video" && videoRef.current && videoRef.current.readyState >= 1) {
+        initWebGL();
+      } else if (mediaType === "image" && imageRef.current && imageRef.current.complete) {
         initWebGL();
       }
     });
@@ -434,6 +536,7 @@ export function useAsciiMe(
   return {
     containerRef,
     videoRef,
+    imageRef,
     canvasRef,
     glRef,
     programRef,
@@ -447,5 +550,6 @@ export function useAsciiMe(
     play,
     pause,
     toggle,
+    mediaType,
   };
 }
