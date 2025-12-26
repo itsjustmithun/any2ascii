@@ -53,6 +53,7 @@ export function useAsciiMe(
   const videoTextureRef = useRef<WebGLTexture | null>(null);
   const atlasTextureRef = useRef<WebGLTexture | null>(null);
   const animationRef = useRef<number>(0);
+  const needsMipmapUpdateRef = useRef(true);
 
   // Feature hooks register their uniform setters here
   const uniformSettersRef = useRef<Map<string, UniformSetter>>(new Map());
@@ -162,6 +163,9 @@ export function useAsciiMe(
     // For image, check if it's loaded
     if (mediaType === "image" && image && (!image.naturalWidth || !image.complete)) return false;
 
+    // Flag that mipmaps need to be regenerated
+    needsMipmapUpdateRef.current = true;
+
     // Recalculate cols and font size based on the *current* container width
     const currentWidth = container.clientWidth;
     const finalCols =
@@ -219,7 +223,18 @@ export function useAsciiMe(
     createFullscreenQuad(gl, program);
 
     // Create textures for video frame and ASCII character atlas
-    videoTextureRef.current = createVideoTexture(gl);
+    if (!videoTextureRef.current) {
+      videoTextureRef.current = createVideoTexture(gl);
+    }
+    
+    // Allocate storage for the video texture ONCE
+    gl.bindTexture(gl.TEXTURE_2D, videoTextureRef.current);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, mediaWidth, mediaHeight, 0, gl.RGBA, gl.UNSIGNED_BYTE, null);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+
     atlasTextureRef.current = createAsciiAtlas(gl, chars, finalFontSize);
 
     // Cache all uniform locations for fast access during render
@@ -292,9 +307,14 @@ export function useAsciiMe(
     // Upload current frame to GPU (works for both video and image)
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, videoTextureRef.current);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, mediaElement);
-    // Generate mipmaps for better quality when sampling large areas
-    gl.generateMipmap(gl.TEXTURE_2D);
+    // Use texSubImage2D for faster texture updates
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, mediaElement);
+    
+    // Generate mipmaps only when needed (e.g., on first load or resize)
+    if (needsMipmapUpdateRef.current) {
+      gl.generateMipmap(gl.TEXTURE_2D);
+      needsMipmapUpdateRef.current = false;
+    }
 
     // Bind the ASCII atlas texture
     gl.activeTexture(gl.TEXTURE1);
@@ -349,8 +369,14 @@ export function useAsciiMe(
     // Upload image to GPU
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, videoTextureRef.current);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-    gl.generateMipmap(gl.TEXTURE_2D);
+    // Use texSubImage2D for faster texture updates
+    gl.texSubImage2D(gl.TEXTURE_2D, 0, 0, 0, gl.RGBA, gl.UNSIGNED_BYTE, image);
+
+    // Generate mipmaps only when needed
+    if (needsMipmapUpdateRef.current) {
+      gl.generateMipmap(gl.TEXTURE_2D);
+      needsMipmapUpdateRef.current = false;
+    }
 
     // Bind the ASCII atlas texture
     gl.activeTexture(gl.TEXTURE1);

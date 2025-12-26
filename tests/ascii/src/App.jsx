@@ -14,13 +14,14 @@ export default function App() {
         <div className="demo">
           <h3>Basic Video with Mouse Trail</h3>
           <AsciiMe 
-            src="/bike.mp4" 
+            src="/hummingbird.mp4" 
             mediaType="video"
-            numColumns={150}
+            numColumns={100}
             colored={true}
             autoPlay={true}
             enableMouse={true}
             trailLength={20}
+            showStats={true}
           />
         </div>
 
@@ -35,6 +36,7 @@ export default function App() {
             autoPlay={true}
             enableRipple={true}
             rippleSpeed={30}
+            showStats={true}
           />
         </div>
       </section>
@@ -49,6 +51,7 @@ export default function App() {
             mediaType="image"
             numColumns={120}
             colored={true}
+            showStats={true}
           />
         </div>
 
@@ -62,6 +65,7 @@ export default function App() {
             colored={true}
             enableMouse={true}
             trailLength={20}
+            showStats={true}
           />
         </div>
 

@@ -38,6 +38,22 @@ uniform float u_rippleSpeed;
 in vec2 v_texCoord;
 out vec4 fragColor;
 
+// Function to get 8x8 bayer matrix value
+float bayer8(ivec2 pos) {
+    const float bayer_matrix[64] = float[](
+         0.0, 32.0,  8.0, 40.0,  2.0, 34.0, 10.0, 42.0,
+        48.0, 16.0, 56.0, 24.0, 50.0, 18.0, 58.0, 26.0,
+        12.0, 44.0,  4.0, 36.0, 14.0, 46.0,  6.0, 38.0,
+        60.0, 28.0, 52.0, 20.0, 62.0, 30.0, 54.0, 22.0,
+         3.0, 35.0, 11.0, 43.0,  1.0, 33.0,  9.0, 41.0,
+        51.0, 19.0, 59.0, 27.0, 49.0, 17.0, 57.0, 25.0,
+        15.0, 47.0,  7.0, 39.0, 13.0, 45.0,  5.0, 37.0,
+        63.0, 31.0, 55.0, 23.0, 61.0, 29.0, 53.0, 21.0
+    );
+    int index = (pos.y & 7) * 8 + (pos.x & 7);
+    return bayer_matrix[index];
+}
+
 void main() {
   // Figure out which ASCII cell this pixel is in
   vec2 cellCoord = floor(v_texCoord * u_gridSize);
@@ -140,18 +156,9 @@ void main() {
   float ditheredBrightness = adjustedBrightness;
   
   if (u_ditherMode > 0.5 && u_ditherMode < 1.5) {
-    // Bayer matrix dithering (ordered dithering)
-    // 4x4 Bayer matrix normalized to [0,1]
-    mat4 bayer = mat4(
-      0.0/16.0,  8.0/16.0,  2.0/16.0, 10.0/16.0,
-      12.0/16.0, 4.0/16.0, 14.0/16.0,  6.0/16.0,
-      3.0/16.0, 11.0/16.0,  1.0/16.0,  9.0/16.0,
-      15.0/16.0, 7.0/16.0, 13.0/16.0,  5.0/16.0
-    );
-    
-    // Get position in 4x4 pattern
-    ivec2 bayerPos = ivec2(mod(gl_FragCoord.xy, 4.0));
-    float threshold = bayer[bayerPos.x][bayerPos.y];
+    // Bayer matrix dithering (ordered dithering) using 8x8 matrix
+    ivec2 coord = ivec2(gl_FragCoord.xy);
+    float threshold = bayer8(coord) / 64.0;
     
     // Add dither threshold scaled by character spacing
     float ditherAmount = (1.0 / u_numChars) * 0.75;
